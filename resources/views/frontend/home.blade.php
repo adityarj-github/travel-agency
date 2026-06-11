@@ -1,180 +1,126 @@
 @extends('layouts.frontend')
 
+@php
+    // Map the existing travel-agency data onto a lakefront cottage layout.
+    $cottages   = $featuredPackages->take(3);
+    $heroImage  = optional($sliders->first())->image_url
+        ?? 'https://images.unsplash.com/photo-1610641818989-c2051b5e2cfd?auto=format&fit=crop&w=2000&q=80';
+@endphp
+
 @section('content')
 
 {{-- ============================================================= --}}
 {{-- HERO --}}
 {{-- ============================================================= --}}
-<section class="relative">
-    <div class="relative h-[92vh] min-h-[620px] overflow-hidden bg-slate-900">
+<section class="relative min-h-[760px] overflow-hidden bg-forest-950 lg:min-h-[88vh]">
+    <img src="{{ $heroImage }}" alt="Lakefront cottages at sunset" fetchpriority="high" decoding="async"
+         class="absolute inset-0 h-full w-full object-cover">
+    <div class="absolute inset-0 bg-gradient-to-r from-forest-950/80 via-forest-950/40 to-forest-950/20"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-forest-950/70 via-transparent to-forest-950/30"></div>
 
-        {{-- Background: rotating sliders, or a single fallback image --}}
-        @if ($sliders->isNotEmpty())
-            <div x-data="{
-                    active: 0,
-                    total: {{ $sliders->count() }},
-                    init() { if (this.total > 1) this.timer = setInterval(() => this.next(), 6500) },
-                    next() { this.active = (this.active + 1) % this.total },
-                    prev() { this.active = (this.active - 1 + this.total) % this.total },
-                    go(i) { this.active = i }
-                 }" class="absolute inset-0">
-                @foreach ($sliders as $i => $slider)
-                    <div x-show="active === {{ $i }}"
-                         x-transition:enter="transition ease-out duration-1000" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                         x-transition:leave="transition ease-in duration-700" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                         class="absolute inset-0">
-                        <img src="{{ $slider->image_url }}" alt="{{ $slider->title }}"
-                             class="h-full w-full object-cover animate-zoom"
-                             @if ($i === 0) fetchpriority="high" @else loading="lazy" @endif decoding="async">
-                    </div>
-                @endforeach
-
-                {{-- Slider navigation --}}
-                @if ($sliders->count() > 1)
-                    <div class="absolute bottom-8 right-6 z-20 hidden items-center gap-3 sm:flex">
-                        <button @click="prev()" aria-label="Previous slide"
-                                class="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 text-white backdrop-blur transition hover:bg-white hover:text-slate-900">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-                        </button>
-                        <button @click="next()" aria-label="Next slide"
-                                class="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 text-white backdrop-blur transition hover:bg-white hover:text-slate-900">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                        </button>
-                    </div>
-                    <div class="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-2">
-                        @foreach ($sliders as $i => $s)
-                            <button @click="go({{ $i }})" aria-label="Go to slide {{ $i + 1 }}"
-                                    class="h-1.5 rounded-full bg-white transition-all duration-300"
-                                    :class="active === {{ $i }} ? 'w-10 opacity-100' : 'w-4 opacity-40'"></button>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-        @else
-            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1920&q=80"
-                 fetchpriority="high" decoding="async"
-                 class="absolute inset-0 h-full w-full object-cover animate-zoom" alt="Travel the world">
-        @endif
-
-        {{-- Overlays --}}
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/55 to-slate-900/40"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-950/20 to-transparent"></div>
-
-        {{-- Hero content --}}
-        @php
-            $heroSlide   = $sliders->first();
-            $heroEyebrow = $heroSlide->subtitle ?? 'Explore the world with us';
-            $heroTitle   = $heroSlide->title ?? 'Discover your next unforgettable journey';
-            $heroCtaText = $heroSlide->button_text ?? 'Browse Packages';
-            $heroCtaLink = ($heroSlide && $heroSlide->button_link) ? $heroSlide->button_link : route('packages.index');
-        @endphp
-        <div class="container relative flex h-full flex-col justify-center pb-28">
-            <div class="max-w-3xl text-white">
-                <p class="animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand-200 backdrop-blur">
-                    <span class="flex h-2 w-2 rounded-full bg-brand-400"></span>
-                    {{ $heroEyebrow }}
-                </p>
-                <h1 class="animate-fade-up delay-100 text-4xl font-bold leading-[1.05] drop-shadow-xl sm:text-6xl lg:text-7xl">
-                    {{ $heroTitle }}
-                </h1>
-                <p class="animate-fade-up delay-200 mt-6 max-w-xl text-lg leading-relaxed text-white/85">
-                    Handpicked tours, breathtaking destinations and seamless travel experiences crafted around the way you love to explore.
-                </p>
-                <div class="animate-fade-up delay-300 mt-9 flex flex-wrap items-center gap-4">
-                    <a href="{{ $heroCtaLink }}" class="btn-primary !px-8 !py-4 text-base shadow-lg shadow-brand-900/40">
-                        {{ $heroCtaText }}
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </a>
-                    <a href="{{ route('contact') }}" class="btn border border-white/40 text-white backdrop-blur transition hover:bg-white hover:text-slate-900 !px-8 !py-4 text-base">
-                        Talk to an Expert
-                    </a>
-                </div>
-
-                {{-- Mini trust row --}}
-                <div class="animate-fade-up delay-500 mt-10 flex flex-wrap items-center gap-x-8 gap-y-4 text-sm text-white/80">
-                    <div class="flex items-center gap-2">
-                        <x-star-rating :rating="5" />
-                        <span>Loved by {{ number_format($stats['travelers']) }}+ travellers</span>
-                    </div>
-                    <div class="hidden h-4 w-px bg-white/25 sm:block"></div>
-                    <div class="flex items-center gap-2">
-                        <svg class="h-5 w-5 text-brand-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>100% secure booking</span>
-                    </div>
-                </div>
+    <div class="container relative grid items-center gap-10 pt-32 pb-20 lg:grid-cols-[1.1fr_minmax(340px,420px)] lg:gap-16 lg:pt-40">
+        {{-- Headline column --}}
+        <div class="max-w-xl text-white">
+            <p class="animate-fade-up mb-6 text-xs font-semibold uppercase tracking-[0.28em] text-forest-100/90">
+                Private Waterfront Escape
+            </p>
+            <h1 class="animate-fade-up delay-100 font-display text-5xl font-semibold leading-[1.08] drop-shadow-lg sm:text-6xl lg:text-7xl">
+                Where Killarney<br>Meets French River
+            </h1>
+            <p class="animate-fade-up delay-200 mt-6 max-w-md text-lg leading-relaxed text-white/85">
+                Three modern lakefront cottages.<br class="hidden sm:block">
+                One unforgettable place to gather.
+            </p>
+            <div class="animate-fade-up delay-300 mt-9 flex flex-wrap items-center gap-4">
+                <a href="#plan" class="inline-flex items-center justify-center gap-2 rounded-sm bg-forest-700 px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white shadow-lg transition hover:bg-forest-800">
+                    Book Your Stay
+                </a>
+                <a href="#cottages" class="inline-flex items-center justify-center gap-2 rounded-sm border border-white/60 bg-white/5 px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white backdrop-blur transition hover:bg-white hover:text-forest-900">
+                    Explore the Cottages
+                </a>
             </div>
         </div>
-    </div>
 
-    {{-- ============ SEARCH BAR (overlaps hero) ============ --}}
-    <div class="container relative z-30 -mt-20">
-        <form action="{{ route('packages.index') }}" method="GET"
-              class="glass grid gap-4 rounded-3xl p-5 shadow-2xl shadow-slate-900/10 sm:p-6 lg:grid-cols-[1fr_1fr_1fr_auto]">
-            <div>
-                <label class="form-label flex items-center gap-1.5 text-slate-600">
-                    <svg class="h-4 w-4 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4-4"/></svg>
-                    Search
-                </label>
-                <input type="text" name="q" placeholder="Where to? e.g. Bali" class="form-input-base !rounded-xl">
-            </div>
-            <div>
-                <label class="form-label flex items-center gap-1.5 text-slate-600">
-                    <svg class="h-4 w-4 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
-                    Destination
-                </label>
-                <select name="destination" class="form-input-base !rounded-xl">
-                    <option value="">Any destination</option>
-                    @foreach ($allDestinations as $d)
-                        <option value="{{ $d->slug }}">{{ $d->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="form-label flex items-center gap-1.5 text-slate-600">
-                    <svg class="h-4 w-4 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
-                    Category
-                </label>
-                <select name="category" class="form-input-base !rounded-xl">
-                    <option value="">Any category</option>
-                    @foreach ($categories as $c)
-                        <option value="{{ $c }}">{{ $c }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex items-end">
-                <button type="submit" class="btn-primary h-[46px] w-full !rounded-xl lg:!px-9">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4-4"/></svg>
-                    Search
+        {{-- Inquiry form card --}}
+        <div id="plan" class="animate-fade-up delay-200 w-full rounded-md bg-white p-7 shadow-2xl shadow-forest-950/30 sm:p-8">
+            <h2 class="font-display text-2xl font-semibold text-forest-900">Plan Your Getaway</h2>
+            <p class="mt-1 text-sm text-slate-500">Tell us a little about your trip and we'll be in touch.</p>
+
+            @if ($errors->any())
+                <div class="mt-4 rounded-sm bg-red-50 px-4 py-3 text-sm text-red-700">
+                    Please double-check the highlighted fields below.
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('booking.store') }}" class="mt-5 space-y-3.5">
+                @csrf
+                <div>
+                    <label class="sr-only">Your Name</label>
+                    <input type="text" name="name" value="{{ old('name', auth()->user()->name ?? '') }}" required
+                           placeholder="Your Name"
+                           class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
+                </div>
+                <div>
+                    <input type="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}" required
+                           placeholder="Email Address"
+                           class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
+                </div>
+                <div>
+                    <input type="text" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" required
+                           placeholder="Phone Number"
+                           class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3.5">
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-slate-500">Check-in Date</label>
+                        <input type="date" name="travel_date" value="{{ old('travel_date') }}" min="{{ date('Y-m-d') }}"
+                               class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-3 py-2.5 text-sm text-slate-600 focus:border-forest-500 focus:ring-forest-500">
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-xs font-medium text-slate-500">Guests</label>
+                        <select name="adults"
+                                class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-3 py-2.5 text-sm text-slate-600 focus:border-forest-500 focus:ring-forest-500">
+                            @for ($g = 1; $g <= 12; $g++)
+                                <option value="{{ $g }}" @selected(old('adults', 2) == $g)>{{ $g }} {{ Str::plural('guest', $g) }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <textarea name="message" rows="2" placeholder="Message / Special Requests"
+                              class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">{{ old('message') }}</textarea>
+                </div>
+                <button type="submit"
+                        class="w-full rounded-sm bg-forest-700 px-6 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-forest-800">
+                    Send Inquiry
                 </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </section>
 
 {{-- ============================================================= --}}
-{{-- STATS --}}
+{{-- AMENITIES STRIP --}}
 {{-- ============================================================= --}}
-<section class="py-16 sm:py-20">
+<section class="border-b border-sand-100 bg-white py-12">
     <div class="container">
         @php
-            $statItems = [
-                ['value' => $stats['destinations'], 'suffix' => '+', 'label' => 'Destinations',     'icon' => 'M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z'],
-                ['value' => $stats['packages'],     'suffix' => '+', 'label' => 'Tour Packages',     'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-                ['value' => $stats['travelers'],    'suffix' => '+', 'label' => 'Happy Travellers',   'icon' => 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z'],
-                ['value' => $stats['reviews'],      'suffix' => '+', 'label' => '5-Star Reviews',     'icon' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.977-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.362-1.118L2.342 9.79c-.783-.57-.38-1.81.588-1.81h4.915a1 1 0 00.95-.69l1.519-4.674z'],
+            $amenities = [
+                ['t' => '3 Private Cottages', 'd' => 'Spacious, modern & perfect for families or groups.',         'i' => 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5M9 21v-6h6v6'],
+                ['t' => 'Waterfront',         'd' => 'Private access to the lake with docks, kayaks & more.',       'i' => 'M3 16c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0M4 12l8-8 8 8M6 12v4'],
+                ['t' => 'Hot Tubs',           'd' => 'Relax under the stars in your private hot tub.',             'i' => 'M4 12h16v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6ZM7 12V7a2 2 0 0 1 4 0M9 4v.01'],
+                ['t' => 'Pet Friendly',       'd' => 'Furry friends are always welcome here.',                     'i' => 'M5.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm13 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM9 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm6 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm-3 4c-2.5 0-4.5 2.5-4.5 5a2 2 0 0 0 2 2c1 0 1.5-.5 2.5-.5s1.5.5 2.5.5a2 2 0 0 0 2-2c0-2.5-2-5-4.5-5Z'],
+                ['t' => 'Ideal for Groups',   'd' => 'Perfect for reunions, retreats & special celebrations.',     'i' => 'M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z'],
             ];
         @endphp
-        <div data-animate-group class="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
-            @foreach ($statItems as $s)
-                <div class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-6 transition hover:border-brand-200 hover:shadow-lg">
-                    <div class="flex h-14 w-14 flex-none items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $s['icon'] }}"/></svg>
-                    </div>
-                    <div>
-                        <div class="text-2xl font-bold text-slate-900 sm:text-3xl"
-                             data-count="{{ $s['value'] }}" data-suffix="{{ $s['suffix'] }}">{{ number_format($s['value']) }}{{ $s['suffix'] }}</div>
-                        <div class="text-sm text-slate-500">{{ $s['label'] }}</div>
-                    </div>
+        <div data-animate-group class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+            @foreach ($amenities as $a)
+                <div class="flex flex-col items-center text-center">
+                    <svg class="h-9 w-9 text-forest-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $a['i'] }}"/>
+                    </svg>
+                    <h3 class="mt-3 text-xs font-bold uppercase tracking-wider text-forest-900">{{ $a['t'] }}</h3>
+                    <p class="mt-1.5 text-xs leading-relaxed text-slate-500">{{ $a['d'] }}</p>
                 </div>
             @endforeach
         </div>
@@ -182,248 +128,190 @@
 </section>
 
 {{-- ============================================================= --}}
-{{-- FEATURED PACKAGES --}}
+{{-- RECONNECT / RECHARGE --}}
 {{-- ============================================================= --}}
-<section class="pb-20">
-    <div class="container">
-        <div class="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-            <div data-animate="up" class="max-w-xl">
-                <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-widest text-brand-600">Top Picks</span>
-                <h2 class="section-title">Featured Travel Packages</h2>
-                <p class="mt-3 text-slate-500">Our most-loved tours, curated for extraordinary experiences from start to finish.</p>
-            </div>
-            <a href="{{ route('packages.index') }}" data-animate="left" class="btn-outline flex-none">
-                View All Packages
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+<section class="bg-sand-50 py-20 lg:py-24">
+    <div class="container grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div data-animate="right">
+            <p class="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-forest-600">Made for Memory Makers</p>
+            <h2 class="font-display text-4xl font-semibold leading-tight text-forest-900 sm:text-5xl">
+                Reconnect. Recharge.<br>Make It Yours.
+            </h2>
+            <p class="mt-6 max-w-md leading-relaxed text-slate-600">
+                Tucked away in {{ setting('site_name', 'Hartley Bay') }}, along the shores of the French River, our three cottages
+                offer the perfect blend of modern comfort and natural beauty. Swim, paddle, fish, or simply relax and take in
+                the view. This is cottage life — made for you.
+            </p>
+            <a href="{{ route('packages.index') }}"
+               class="mt-8 inline-flex items-center gap-2 rounded-sm bg-forest-700 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-forest-800">
+                Discover the Experience
             </a>
         </div>
 
-        @if ($featuredPackages->isNotEmpty())
-            <div data-animate-group class="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($featuredPackages as $package)
-                    <x-package-card :package="$package" />
+        <div data-animate="left" class="relative overflow-hidden rounded-md card-shadow">
+            <img src="https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1100&q=80"
+                 alt="Cottages by the water" loading="lazy" decoding="async"
+                 class="aspect-[4/3] w-full object-cover">
+            <div class="absolute bottom-5 left-5 rounded-sm bg-forest-950/75 px-5 py-3 text-white backdrop-blur">
+                <p class="text-xs font-semibold uppercase tracking-wider text-forest-100">Hartley Bay, Killarney</p>
+                <p class="text-sm text-white/85">Peaceful. Private. Yours.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ============================================================= --}}
+{{-- FIND YOUR PERFECT STAY --}}
+{{-- ============================================================= --}}
+<section id="cottages" class="bg-white py-20 lg:py-24">
+    <div class="container">
+        <div data-animate="up" class="mx-auto max-w-2xl text-center">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-forest-600">Three Cottages. Endless Possibilities.</p>
+            <h2 class="font-display text-4xl font-semibold text-forest-900 sm:text-5xl">Find Your Perfect Stay</h2>
+        </div>
+
+        @if ($cottages->isNotEmpty())
+            <div data-animate-group class="mt-14 grid gap-8 md:grid-cols-3">
+                @foreach ($cottages as $cottage)
+                    <article class="group flex h-full flex-col overflow-hidden rounded-md bg-white card-shadow transition hover:-translate-y-1">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="{{ $cottage->main_image_url }}" alt="{{ $cottage->title }}" loading="lazy" decoding="async"
+                                 class="h-full w-full object-cover transition duration-700 group-hover:scale-110">
+                            <span class="absolute left-4 top-4 rounded-sm bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-forest-800">
+                                {{ $cottage->category ?? 'Cottage' }}
+                            </span>
+                        </div>
+                        <div class="flex flex-1 flex-col p-6">
+                            <h3 class="font-display text-xl font-semibold text-forest-900">{{ $cottage->title }}</h3>
+
+                            <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+                                <span class="inline-flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-forest-600" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"/></svg>
+                                    Sleeps {{ $cottage->max_people ?? 8 }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-forest-600" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5"/></svg>
+                                    {{ $cottage->duration_label }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5">
+                                    <svg class="h-4 w-4 text-forest-600" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657 13.414 20.9a2 2 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0Z"/><circle cx="12" cy="11" r="3"/></svg>
+                                    {{ $cottage->location ?? optional($cottage->destination)->name ?? 'Waterfront' }}
+                                </span>
+                            </div>
+
+                            <p class="mt-4 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500">
+                                {{ $cottage->short_description }}
+                            </p>
+
+                            <div class="mt-5 flex items-center justify-between border-t border-sand-100 pt-4">
+                                <div>
+                                    <span class="text-xs text-slate-400">From</span>
+                                    <div class="text-lg font-semibold text-forest-800">
+                                        {{ setting('currency_symbol', '$') }}{{ number_format($cottage->effective_price, 0) }}
+                                    </div>
+                                </div>
+                                <a href="{{ route('packages.show', $cottage->slug) }}"
+                                   class="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wider text-forest-700 transition hover:text-forest-900">
+                                    View Cottage
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
                 @endforeach
             </div>
         @else
-            <p class="mt-12 rounded-2xl border border-dashed border-slate-200 py-16 text-center text-slate-400">
-                Packages will appear here once added from the admin panel.
+            <p class="mt-12 rounded-md border border-dashed border-sand-200 py-16 text-center text-slate-400">
+                Cottages will appear here once added from the admin panel.
             </p>
         @endif
     </div>
 </section>
 
 {{-- ============================================================= --}}
-{{-- POPULAR DESTINATIONS — bento grid --}}
+{{-- EXPERIENCE THE BEST OF — dark photo band --}}
 {{-- ============================================================= --}}
-@if ($destinations->isNotEmpty())
-<section class="bg-slate-50 py-20">
-    <div class="container">
-        <x-section-heading data-animate="up" eyebrow="Where to go" title="Popular Destinations"
-                           subtitle="Explore the world's most stunning places with our expertly guided tours." />
+<section class="relative overflow-hidden bg-forest-950 py-20 text-white lg:py-24">
+    <img src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2000&q=80"
+         alt="Kayaking on the lake" loading="lazy" decoding="async"
+         class="absolute inset-0 h-full w-full object-cover opacity-25">
+    <div class="absolute inset-0 bg-gradient-to-r from-forest-950 via-forest-950/85 to-forest-900/60"></div>
 
-        @php $bento = $destinations->take(5); @endphp
-        <div data-animate-group class="mt-12 grid auto-rows-[220px] grid-cols-2 gap-5 lg:grid-cols-4">
-            @foreach ($bento as $i => $destination)
-                {{-- First card spans larger on big screens for an editorial feel --}}
-                <a href="{{ route('destinations.show', $destination->slug) }}"
-                   class="group relative block overflow-hidden rounded-3xl card-shadow
-                          {{ $i === 0 ? 'col-span-2 row-span-2' : '' }}">
-                    <img src="{{ $destination->image_url }}" alt="{{ $destination->name }}" loading="lazy" decoding="async"
-                         class="h-full w-full object-cover transition duration-700 group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent"></div>
-                    <div class="absolute inset-x-0 bottom-0 flex items-end justify-between p-5 text-white">
-                        <div>
-                            <p class="text-xs uppercase tracking-widest text-brand-200">{{ $destination->country ?? 'Destination' }}</p>
-                            <h3 class="mt-1 font-bold {{ $i === 0 ? 'text-2xl sm:text-3xl' : 'text-lg' }}">{{ $destination->name }}</h3>
-                            <p class="mt-1 text-sm text-white/80">{{ $destination->packages_count ?? 0 }} tour package(s)</p>
-                        </div>
-                        <span class="flex h-10 w-10 flex-none translate-y-2 items-center justify-center rounded-full bg-white/15 opacity-0 backdrop-blur transition group-hover:translate-y-0 group-hover:opacity-100">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                        </span>
-                    </div>
-                </a>
-            @endforeach
-        </div>
-
-        <div class="mt-10 text-center">
-            <a href="{{ route('destinations.index') }}" class="btn-outline">Explore All Destinations</a>
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ============================================================= --}}
-{{-- WHY CHOOSE US — split layout --}}
-{{-- ============================================================= --}}
-<section class="py-20">
-    <div class="container grid items-center gap-14 lg:grid-cols-2">
-        {{-- Image collage --}}
-        <div data-animate="right" class="relative">
-            <div class="overflow-hidden rounded-[2rem] card-shadow">
-                <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80"
-                     alt="Travellers on an adventure" loading="lazy" decoding="async"
-                     class="aspect-[4/5] w-full object-cover">
-            </div>
-            <div class="absolute -bottom-8 -right-4 hidden w-48 overflow-hidden rounded-2xl border-4 border-white card-shadow animate-float sm:block lg:-right-8 lg:w-56">
-                <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=600&q=80"
-                     alt="Scenic view" loading="lazy" decoding="async" class="aspect-square w-full object-cover">
-            </div>
-            {{-- Floating rating badge --}}
-            <div class="absolute -left-4 top-8 flex items-center gap-3 rounded-2xl bg-white p-4 card-shadow lg:-left-8">
-                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-white">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div>
-                    <div class="text-sm font-bold text-slate-900">Best Price</div>
-                    <div class="text-xs text-slate-500">Guaranteed</div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Feature list --}}
-        <div data-animate="left">
-            <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-widest text-brand-600">Why travel with us</span>
-            <h2 class="section-title">The {{ setting('site_name', config('app.name')) }} Difference</h2>
-            <p class="mt-3 text-slate-500">We obsess over the details so you can focus on the adventure. Here's what sets every one of our journeys apart.</p>
+    <div class="container relative grid items-center gap-12 lg:grid-cols-[1.3fr_1fr] lg:gap-16">
+        <div data-animate="right">
+            <p class="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-forest-200">More Than a Stay</p>
+            <h2 class="font-display text-4xl font-semibold leading-tight sm:text-5xl">
+                Experience the Best of<br>Killarney &amp; French River
+            </h2>
+            <p class="mt-5 max-w-lg leading-relaxed text-white/80">
+                Subscribe for updates, special offers & travel inspiration — and discover everything there is to do
+                right outside your door, in every season.
+            </p>
 
             @php
-                $features = [
-                    ['t' => 'Handpicked Tours', 'd' => 'Every itinerary is carefully designed by travel experts for unforgettable moments.', 'i' => 'M5 13l4 4L19 7'],
-                    ['t' => 'Best Price Guarantee', 'd' => 'Premium experiences at competitive prices with no hidden charges, ever.', 'i' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1'],
-                    ['t' => '24/7 Support', 'd' => 'Our dedicated team is always one message away, wherever in the world you are.', 'i' => 'M18.364 5.636a9 9 0 010 12.728m0 0l-3.536-3.536m3.536 3.536L12 12m6.364 6.364A9 9 0 015.636 5.636'],
-                    ['t' => 'Trusted by Travellers', 'd' => 'Thousands of happy customers and glowing reviews from around the world.', 'i' => 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.977-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.539-1.118l1.518-4.674a1 1 0 00-.362-1.118L2.342 9.79c-.783-.57-.38-1.81.588-1.81h4.915a1 1 0 00.95-.69l1.519-4.674z'],
+                $activities = [
+                    ['t' => 'Fishing',      'i' => 'M2 12c4-5 10-5 14 0M16 12c2 0 4 1 6 0M6 12a1 1 0 1 0 0-.01'],
+                    ['t' => 'Kayaking',     'i' => 'M3 16c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0M7 13l5-9 5 9'],
+                    ['t' => 'Hiking',       'i' => 'M13 4a1.5 1.5 0 1 0 0-.01M9 21l3-6 2 3h4M12 15l-1-4 4 2 2-2'],
+                    ['t' => 'Snowmobiling', 'i' => 'M4 17h9l4-4h3M4 17l3-5h6l3 3M7 20a2 2 0 1 0 0-.01M17 20a2 2 0 1 0 0-.01'],
+                    ['t' => 'Local Dining', 'i' => 'M5 3v8a2 2 0 0 0 4 0V3M7 11v10M17 3c-1.5 0-2.5 2-2.5 5s1 4 2.5 4v9'],
                 ];
             @endphp
-            <div data-animate-group class="mt-8 grid gap-6 sm:grid-cols-2">
-                @foreach ($features as $f)
-                    <div class="flex gap-4">
-                        <div class="flex h-12 w-12 flex-none items-center justify-center rounded-2xl bg-brand-50 text-brand-600">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $f['i'] }}"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="mb-1 font-bold text-slate-900">{{ $f['t'] }}</h3>
-                            <p class="text-sm text-slate-500">{{ $f['d'] }}</p>
-                        </div>
+            <div class="mt-9 flex flex-wrap gap-x-10 gap-y-6">
+                @foreach ($activities as $act)
+                    <div class="flex flex-col items-center gap-2 text-center">
+                        <span class="flex h-12 w-12 items-center justify-center rounded-full border border-white/25 bg-white/5">
+                            <svg class="h-6 w-6 text-forest-100" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $act['i'] }}"/></svg>
+                        </span>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-white/80">{{ $act['t'] }}</span>
                     </div>
                 @endforeach
-            </div>
-        </div>
-    </div>
-</section>
-
-{{-- ============================================================= --}}
-{{-- HOW IT WORKS --}}
-{{-- ============================================================= --}}
-<section class="bg-brand-950 py-20 text-white">
-    <div class="container">
-        <div data-animate="up" class="mx-auto max-w-2xl text-center">
-            <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-widest text-brand-300">Simple &amp; seamless</span>
-            <h2 class="section-title text-white">Plan Your Trip in 3 Easy Steps</h2>
-            <p class="mt-3 text-white/70">From the first spark of wanderlust to wheels-up, we make the whole journey effortless.</p>
-        </div>
-
-        @php
-            $steps = [
-                ['n' => '01', 't' => 'Find Your Trip', 'd' => 'Browse handpicked packages and destinations, or search by what matters most to you.', 'i' => 'M21 21l-4-4m2-5a7 7 0 11-14 0 7 7 0 0114 0z'],
-                ['n' => '02', 't' => 'Book Securely', 'd' => 'Reserve your spot in minutes with secure checkout and instant confirmation.', 'i' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                ['n' => '03', 't' => 'Pack & Go', 'd' => 'Get your travel voucher, meet your guide and set off on an unforgettable adventure.', 'i' => 'M3 21l1.9-5.7a8.38 8.38 0 1113.8 0L20.6 21H3z M9 21v-6a3 3 0 016 0v6'],
-            ];
-        @endphp
-        <div class="relative mt-14">
-            {{-- connecting line --}}
-            <div class="absolute left-1/2 top-12 hidden h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent md:block"></div>
-            <div data-animate-group class="grid gap-8 md:grid-cols-3">
-                @foreach ($steps as $step)
-                    <div class="relative rounded-3xl bg-white/5 p-8 text-center ring-1 ring-white/10 transition hover:bg-white/10">
-                        <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-lg shadow-brand-900/50">
-                            <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $step['i'] }}"/></svg>
-                        </div>
-                        <div class="mb-1 text-sm font-bold tracking-widest text-brand-300">{{ $step['n'] }}</div>
-                        <h3 class="mb-2 text-xl font-bold text-white">{{ $step['t'] }}</h3>
-                        <p class="text-sm text-white/70">{{ $step['d'] }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        <div class="mt-12 text-center">
-            <a href="{{ route('packages.index') }}" class="btn-white">Start Planning</a>
-        </div>
-    </div>
-</section>
-
-{{-- ============================================================= --}}
-{{-- TESTIMONIALS --}}
-{{-- ============================================================= --}}
-@if ($testimonials->isNotEmpty())
-<section class="py-20">
-    <div class="container">
-        <x-section-heading data-animate="up" eyebrow="Happy Travellers" title="What Our Customers Say"
-                           subtitle="Real stories from real adventurers who explored the world with us." />
-        <div data-animate-group class="mt-12 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-            @foreach ($testimonials as $t)
-                <figure class="relative flex h-full flex-col rounded-3xl border border-slate-100 bg-white p-7 card-shadow">
-                    <svg class="absolute right-7 top-7 h-10 w-10 text-brand-100" fill="currentColor" viewBox="0 0 24 24"><path d="M9.983 3v7.391c0 5.704-3.731 9.57-8.983 10.609l-.995-2.151c2.432-.917 3.995-3.638 3.995-5.849h-4v-10h9.983zm14.017 0v7.391c0 5.704-3.748 9.571-9 10.609l-.996-2.151c2.433-.917 3.996-3.638 3.996-5.849h-3.983v-10h9.983z"/></svg>
-                    <x-star-rating :rating="$t->rating" />
-                    <blockquote class="mt-4 flex-1 text-sm leading-relaxed text-slate-600">“{{ $t->message }}”</blockquote>
-                    <figcaption class="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
-                        <img src="{{ $t->image_url }}" alt="{{ $t->name }}" loading="lazy" decoding="async" width="48" height="48" class="h-12 w-12 rounded-full object-cover ring-2 ring-brand-100">
-                        <div>
-                            <p class="font-semibold text-slate-900">{{ $t->name }}</p>
-                            @if ($t->location)<p class="text-xs text-slate-500">{{ $t->location }}</p>@endif
-                        </div>
-                    </figcaption>
-                </figure>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ============================================================= --}}
-{{-- BLOG PREVIEW --}}
-{{-- ============================================================= --}}
-@if ($latestBlogs->isNotEmpty())
-<section class="bg-slate-50 py-20">
-    <div class="container">
-        <div class="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-            <div data-animate="up" class="max-w-xl">
-                <span class="mb-2 inline-block text-sm font-semibold uppercase tracking-widest text-brand-600">Travel Stories</span>
-                <h2 class="section-title">From Our Blog</h2>
-                <p class="mt-3 text-slate-500">Tips, guides and inspiration for your next adventure.</p>
-            </div>
-            <a href="{{ route('blog.index') }}" data-animate="left" class="btn-outline flex-none">
-                Read More Articles
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-            </a>
-        </div>
-        <div data-animate-group class="mt-12 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach ($latestBlogs as $blog)
-                <x-blog-card :blog="$blog" />
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-{{-- ============================================================= --}}
-{{-- CALL TO ACTION --}}
-{{-- ============================================================= --}}
-<section class="py-20">
-    <div class="container">
-        <div data-animate="zoom" class="relative overflow-hidden rounded-[2.5rem] px-6 py-16 text-center text-white sm:px-12 sm:py-20">
-            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80"
-                 loading="lazy" decoding="async" data-parallax="0.12" class="absolute left-0 top-[-20%] h-[130%] w-full object-cover" alt="">
-            <div class="absolute inset-0 bg-gradient-to-r from-brand-950/95 via-brand-900/85 to-brand-800/75"></div>
-            <div class="relative mx-auto max-w-2xl">
-                <span class="mb-3 inline-block text-sm font-semibold uppercase tracking-widest text-brand-200">Your adventure awaits</span>
-                <h2 class="text-3xl font-bold sm:text-4xl lg:text-5xl">Ready for Your Next Adventure?</h2>
-                <p class="mx-auto mt-4 max-w-xl text-white/85">Let our travel experts craft the perfect journey for you. Send an inquiry today and start exploring the world.</p>
-                <div class="mt-9 flex flex-wrap justify-center gap-4">
-                    <a href="{{ route('booking.create') }}" class="btn-white !px-8 !py-4 text-base">Make an Inquiry</a>
-                    <a href="{{ route('contact') }}" class="btn border border-white/50 text-white transition hover:bg-white/10 !px-8 !py-4 text-base">Contact Us</a>
+                <div class="flex items-center">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-forest-200">&amp; More</span>
                 </div>
             </div>
+        </div>
+
+        {{-- Review card --}}
+        @php $review = $testimonials->first(); @endphp
+        <div data-animate="left" class="rounded-md bg-white/10 p-8 ring-1 ring-white/15 backdrop-blur">
+            <div class="flex justify-center gap-1 text-amber-300">
+                @for ($i = 0; $i < 5; $i++)
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.45 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z"/></svg>
+                @endfor
+            </div>
+            <blockquote class="mt-5 text-center font-display text-xl font-medium italic leading-relaxed text-white">
+                “{{ $review->message ?? 'The perfect group getaway. Beautiful cottages, amazing views, and so peaceful. We will absolutely be back!' }}”
+            </blockquote>
+            <p class="mt-6 text-center text-sm font-semibold uppercase tracking-wider text-forest-200">
+                — {{ $review->name ?? 'Local Guest' }}
+            </p>
+        </div>
+    </div>
+</section>
+
+{{-- ============================================================= --}}
+{{-- NEWSLETTER CTA --}}
+{{-- ============================================================= --}}
+<section class="bg-sand-50 py-16">
+    <div class="container">
+        <div class="flex flex-col items-center justify-between gap-6 rounded-md bg-white px-8 py-10 card-shadow lg:flex-row lg:gap-10">
+            <div class="text-center lg:text-left">
+                <h2 class="font-display text-2xl font-semibold text-forest-900 sm:text-3xl">Ready to plan your getaway?</h2>
+                <p class="mt-2 text-sm text-slate-500">Subscribe for updates, special offers & travel inspiration.</p>
+            </div>
+            <form action="{{ route('contact.store') }}" method="POST" class="flex w-full max-w-md gap-3">
+                @csrf
+                <input type="hidden" name="name" value="Newsletter Subscriber">
+                <input type="hidden" name="subject" value="Newsletter Signup">
+                <input type="hidden" name="message" value="Please add me to the newsletter.">
+                <input type="email" name="email" required placeholder="Enter your email"
+                       class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
+                <button type="submit"
+                        class="flex-none rounded-sm bg-forest-700 px-7 py-3 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-forest-800">
+                    Subscribe
+                </button>
+            </form>
         </div>
     </div>
 </section>
