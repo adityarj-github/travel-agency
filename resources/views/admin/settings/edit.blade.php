@@ -11,7 +11,7 @@
     @method('PUT')
 
     <div class="mb-6 flex flex-wrap gap-2 border-b border-slate-200">
-        @php $tabs = ['general' => 'General', 'contact' => 'Contact', 'social' => 'Social', 'seo' => 'SEO', 'branding' => 'Branding & About']; @endphp
+        @php $tabs = ['general' => 'General', 'contact' => 'Contact', 'social' => 'Social', 'reviews' => 'Reviews', 'seo' => 'SEO', 'branding' => 'Branding & About']; @endphp
         @foreach ($tabs as $key => $label)
             <button type="button" @click="tab = '{{ $key }}'"
                     class="-mb-px border-b-2 px-4 py-3 text-sm font-semibold transition"
@@ -70,6 +70,32 @@
                 <div><label class="form-label">Instagram URL</label><input type="url" name="instagram" value="{{ $settings['instagram'] ?? '' }}" class="form-input-base"></div>
                 <div><label class="form-label">Twitter / X URL</label><input type="url" name="twitter" value="{{ $settings['twitter'] ?? '' }}" class="form-input-base"></div>
                 <div><label class="form-label">YouTube URL</label><input type="url" name="youtube" value="{{ $settings['youtube'] ?? '' }}" class="form-input-base"></div>
+            </div>
+        </div>
+    </div>
+
+    {{-- REVIEWS --}}
+    <div x-show="tab === 'reviews'" x-cloak class="grid gap-6 lg:grid-cols-2">
+        <div class="rounded-2xl bg-white p-6 shadow-sm">
+            <h3 class="mb-1 font-bold text-slate-900">Google Reviews</h3>
+            <p class="mb-4 text-xs text-slate-400">Shown as a rating badge in the "Loved by Our Guests" section on the home page.</p>
+            <div class="space-y-4">
+                <div><label class="form-label">Reviews URL</label><input type="url" name="google_reviews_url" value="{{ $settings['google_reviews_url'] ?? '' }}" class="form-input-base" placeholder="https://www.google.com/maps/place/..."></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="form-label">Rating</label><input type="text" name="google_rating" value="{{ $settings['google_rating'] ?? '' }}" class="form-input-base" placeholder="4.9"></div>
+                    <div><label class="form-label">Review Count</label><input type="text" name="google_review_count" value="{{ $settings['google_review_count'] ?? '' }}" class="form-input-base" placeholder="120"></div>
+                </div>
+            </div>
+        </div>
+        <div class="rounded-2xl bg-white p-6 shadow-sm">
+            <h3 class="mb-1 font-bold text-slate-900">Airbnb Reviews</h3>
+            <p class="mb-4 text-xs text-slate-400">Shown as a rating badge alongside Google on the home page.</p>
+            <div class="space-y-4">
+                <div><label class="form-label">Reviews URL</label><input type="url" name="airbnb_reviews_url" value="{{ $settings['airbnb_reviews_url'] ?? '' }}" class="form-input-base" placeholder="https://www.airbnb.com/rooms/..."></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="form-label">Rating</label><input type="text" name="airbnb_rating" value="{{ $settings['airbnb_rating'] ?? '' }}" class="form-input-base" placeholder="4.95"></div>
+                    <div><label class="form-label">Review Count</label><input type="text" name="airbnb_review_count" value="{{ $settings['airbnb_review_count'] ?? '' }}" class="form-input-base" placeholder="86"></div>
+                </div>
             </div>
         </div>
     </div>

@@ -96,6 +96,11 @@ class BlogController extends Controller
     {
         $data = $request->validated();
 
+        // Sanitize the rich-text body to strip scripts/event handlers before storage.
+        if (! empty($data['content'])) {
+            $data['content'] = clean($data['content'], 'blog');
+        }
+
         if ($data['is_published'] && empty($data['published_at'])) {
             $data['published_at'] = now();
         }

@@ -10,7 +10,7 @@ class CouponRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return (bool) $this->user()?->can('manage_coupons');
     }
 
     public function rules(): array

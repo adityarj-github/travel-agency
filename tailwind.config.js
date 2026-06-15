@@ -56,7 +56,20 @@ export default {
             },
             container: {
                 center: true,
-                padding: '1rem',
+                padding: {
+                    DEFAULT: '1rem',
+                    sm: '1.5rem',
+                    lg: '2rem',
+                },
+                // Cap the desktop layout at 1200px so content never stretches
+                // edge-to-edge on large monitors, while staying fluid below.
+                screens: {
+                    sm: '640px',
+                    md: '768px',
+                    lg: '1024px',
+                    xl: '1200px',
+                    '2xl': '1200px',
+                },
             },
         },
     },

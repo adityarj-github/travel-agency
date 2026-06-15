@@ -33,8 +33,8 @@
 
     <div class="grid gap-4 sm:grid-cols-2">
         <div>
-            <label class="form-label">Phone <span class="text-red-500">*</span></label>
-            <input type="text" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" required class="form-input-base" placeholder="+1 555 000 0000">
+            <label class="form-label">Phone</label>
+            <input type="text" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" class="form-input-base" placeholder="+1 555 000 0000">
         </div>
         <div>
             <label class="form-label">Travel Date</label>
@@ -121,6 +121,12 @@
         <p class="mt-2 text-xs text-slate-400">Final price is confirmed by our team. This is an estimate only.</p>
     </div>
 
-    <button type="submit" class="btn-primary w-full">Submit Booking Inquiry</button>
-    <p class="text-center text-xs text-slate-400">Your inquiry is free and our team will respond within 24 hours.</p>
+    <button type="submit" class="btn-primary w-full">
+        <span x-show="total > 0" x-cloak>Proceed to Secure Payment</span>
+        <span x-show="total <= 0">Submit Booking Inquiry</span>
+    </button>
+    <p class="text-center text-xs text-slate-400">
+        <span x-show="total > 0" x-cloak>You'll be taken to our secure payment partner (Razorpay) to confirm your booking.</span>
+        <span x-show="total <= 0">Your inquiry is free and our team will respond within 24 hours.</span>
+    </p>
 </form>
