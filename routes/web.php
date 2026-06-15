@@ -16,6 +16,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Account\AccountController;
@@ -36,11 +37,17 @@ Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('blog.sho
 Route::get('/gallery', [GalleryController::class, 'index'])->name('gallery');
 
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:8,1')->name('contact.store');
 
 Route::get('/booking', [BookingController::class, 'create'])->name('booking.create');
-Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-Route::post('/booking/apply-coupon', [BookingController::class, 'applyCoupon'])->name('booking.apply-coupon');
+Route::post('/booking', [BookingController::class, 'store'])->middleware('throttle:8,1')->name('booking.store');
+Route::post('/booking/apply-coupon', [BookingController::class, 'applyCoupon'])->middleware('throttle:15,1')->name('booking.apply-coupon');
+
+// Razorpay payment (token-guarded so guests can pay for their own booking)
+Route::get('/booking/{booking}/pay', [PaymentController::class, 'show'])->name('booking.pay');
+Route::post('/booking/{booking}/payment', [PaymentController::class, 'callback'])->middleware('throttle:10,1')->name('booking.payment.callback');
+Route::get('/booking/{booking}/thank-you', [PaymentController::class, 'success'])->name('booking.payment.success');
+Route::post('/razorpay/webhook', [PaymentController::class, 'webhook'])->name('razorpay.webhook');
 
 // SEO
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
@@ -54,9 +61,9 @@ Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 // Guest-only pages guard themselves in the controller (redirectIfAuthenticated).
 Route::get('register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('register', [AuthController::class, 'register'])->name('register.attempt');
+Route::post('register', [AuthController::class, 'register'])->middleware('throttle:6,1')->name('register.attempt');
 Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('login', [AuthController::class, 'login'])->name('login.attempt');
+Route::post('login', [AuthController::class, 'login'])->middleware('throttle:6,1')->name('login.attempt');
 
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
@@ -87,6 +94,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuth;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PackageController as AdminPackage;
 use App\Http\Controllers\Admin\BookingController as AdminBooking;
+use App\Http\Controllers\Admin\PaymentLinkController as AdminPaymentLink;
 use App\Http\Controllers\Admin\BlogController as AdminBlog;
 use App\Http\Controllers\Admin\BlogCategoryController as AdminBlogCategory;
 use App\Http\Controllers\Admin\DestinationController as AdminDestination;
@@ -102,7 +110,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Guest (login) routes
     Route::get('login', [AdminAuth::class, 'showLogin'])->name('login');
-    Route::post('login', [AdminAuth::class, 'login'])->name('login.attempt');
+    Route::post('login', [AdminAuth::class, 'login'])->middleware('throttle:6,1')->name('login.attempt');
 
     // Authenticated admin routes
     Route::middleware(['auth', 'admin'])->group(function () {
@@ -140,6 +148,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('bookings/{booking}/status', [AdminBooking::class, 'updateStatus'])->name('bookings.status');
             Route::get('bookings/{booking}/voucher', [AdminBooking::class, 'voucher'])->name('bookings.voucher');
             Route::resource('bookings', AdminBooking::class)->only(['index', 'show', 'update', 'destroy']);
+
+            // Custom payment-link generator — create a token-guarded pay link to share.
+            Route::get('payment-links', [AdminPaymentLink::class, 'index'])->name('payment-links.index');
+            Route::post('payment-links', [AdminPaymentLink::class, 'store'])->name('payment-links.store');
+            Route::delete('payment-links/{paymentLink}', [AdminPaymentLink::class, 'destroy'])->name('payment-links.destroy');
         });
 
         // Coupons (manager / admin)

@@ -87,6 +87,41 @@
                         </div>
                     </dl>
                 </div>
+
+                {{-- Payment --}}
+                <div class="rounded-2xl bg-white p-6 shadow-sm">
+                    <h3 class="mb-4 font-bold text-slate-900">Payment</h3>
+                    <dl class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <dt class="text-xs uppercase text-slate-400">Status</dt>
+                            <dd><span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $booking->payment_badge }}">{{ ucfirst($booking->payment_status) }}</span></dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase text-slate-400">Method</dt>
+                            <dd class="text-slate-800">{{ $booking->payment_method ? ucfirst($booking->payment_method) : '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase text-slate-400">Amount Paid</dt>
+                            <dd class="text-slate-800">{{ $booking->amount_paid !== null ? $symbol . number_format($booking->amount_paid, 2) : '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs uppercase text-slate-400">Paid At</dt>
+                            <dd class="text-slate-800">{{ $booking->paid_at ? $booking->paid_at->format('M d, Y \a\t g:i A') : '—' }}</dd>
+                        </div>
+                        @if ($booking->razorpay_payment_id)
+                            <div class="sm:col-span-2">
+                                <dt class="text-xs uppercase text-slate-400">Razorpay Payment ID</dt>
+                                <dd class="font-mono text-xs text-slate-600">{{ $booking->razorpay_payment_id }}</dd>
+                            </div>
+                        @endif
+                        @if ($booking->razorpay_order_id)
+                            <div class="sm:col-span-2">
+                                <dt class="text-xs uppercase text-slate-400">Razorpay Order ID</dt>
+                                <dd class="font-mono text-xs text-slate-600">{{ $booking->razorpay_order_id }}</dd>
+                            </div>
+                        @endif
+                    </dl>
+                </div>
             @endif
         </div>
 

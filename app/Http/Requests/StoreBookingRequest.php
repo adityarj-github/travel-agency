@@ -16,7 +16,7 @@ class StoreBookingRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30'],
             'package_id' => ['nullable', 'exists:packages,id'],
             'destination_id' => ['nullable', 'exists:destinations,id'],
             'travel_date' => ['nullable', 'date', 'after_or_equal:today'],

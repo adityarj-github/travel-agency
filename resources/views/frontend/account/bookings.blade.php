@@ -40,9 +40,18 @@
                                             <td class="px-5 py-4 text-slate-700">
                                                 @if ((float) $booking->total > 0){{ setting('currency_symbol', '$') }}{{ number_format($booking->total, 0) }}@else—@endif
                                             </td>
-                                            <td class="px-5 py-4"><span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $booking->status_badge }}">{{ ucfirst($booking->status) }}</span></td>
+                                            <td class="px-5 py-4">
+                                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $booking->status_badge }}">{{ ucfirst($booking->status) }}</span>
+                                                @if ((float) $booking->total > 0)
+                                                    <span class="mt-1 block"><span class="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide {{ $booking->payment_badge }}">{{ $booking->payment_status }}</span></span>
+                                                @endif
+                                            </td>
                                             <td class="px-5 py-4 text-right">
-                                                <a href="{{ route('account.bookings.voucher', $booking) }}" class="font-medium text-brand-600 hover:underline">Download Voucher</a>
+                                                @if ($booking->requiresPayment())
+                                                    <a href="{{ route('booking.pay', $booking) }}" class="font-semibold text-brand-600 hover:underline">Pay now</a>
+                                                    <span class="px-1 text-slate-300">·</span>
+                                                @endif
+                                                <a href="{{ route('account.bookings.voucher', $booking) }}" class="font-medium text-slate-500 hover:underline">Voucher</a>
                                             </td>
                                         </tr>
                                     @endforeach

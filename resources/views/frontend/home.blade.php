@@ -41,7 +41,7 @@
             </div>
         </div>
 
-        {{-- Inquiry form card --}}
+        {{-- Inquiry form card — same booking form used across the site --}}
         <div id="plan" class="animate-fade-up delay-200 w-full rounded-md bg-white p-7 shadow-2xl shadow-forest-950/30 sm:p-8">
             <h2 class="font-display text-2xl font-semibold text-forest-900">Plan Your Getaway</h2>
             <p class="mt-1 text-sm text-slate-500">Tell us a little about your trip and we'll be in touch.</p>
@@ -52,49 +52,9 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('booking.store') }}" class="mt-5 space-y-3.5">
-                @csrf
-                <div>
-                    <label class="sr-only">Your Name</label>
-                    <input type="text" name="name" value="{{ old('name', auth()->user()->name ?? '') }}" required
-                           placeholder="Your Name"
-                           class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
-                </div>
-                <div>
-                    <input type="email" name="email" value="{{ old('email', auth()->user()->email ?? '') }}" required
-                           placeholder="Email Address"
-                           class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
-                </div>
-                <div>
-                    <input type="text" name="phone" value="{{ old('phone', auth()->user()->phone ?? '') }}" required
-                           placeholder="Phone Number"
-                           class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">
-                </div>
-                <div class="grid grid-cols-2 gap-3.5">
-                    <div>
-                        <label class="mb-1 block text-xs font-medium text-slate-500">Check-in Date</label>
-                        <input type="date" name="travel_date" value="{{ old('travel_date') }}" min="{{ date('Y-m-d') }}"
-                               class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-3 py-2.5 text-sm text-slate-600 focus:border-forest-500 focus:ring-forest-500">
-                    </div>
-                    <div>
-                        <label class="mb-1 block text-xs font-medium text-slate-500">Guests</label>
-                        <select name="adults"
-                                class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-3 py-2.5 text-sm text-slate-600 focus:border-forest-500 focus:ring-forest-500">
-                            @for ($g = 1; $g <= 12; $g++)
-                                <option value="{{ $g }}" @selected(old('adults', 2) == $g)>{{ $g }} {{ Str::plural('guest', $g) }}</option>
-                            @endfor
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <textarea name="message" rows="2" placeholder="Message / Special Requests"
-                              class="w-full rounded-sm border-slate-200 bg-sand-50/60 px-4 py-3 text-sm text-slate-700 placeholder-slate-400 focus:border-forest-500 focus:ring-forest-500">{{ old('message') }}</textarea>
-                </div>
-                <button type="submit"
-                        class="w-full rounded-sm bg-forest-700 px-6 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-forest-800">
-                    Send Inquiry
-                </button>
-            </form>
+            <div class="mt-5">
+                <x-booking-form :packages="$packages" :destinations="$bookingDestinations" compact />
+            </div>
         </div>
     </div>
 </section>
@@ -171,9 +131,9 @@
         </div>
 
         @if ($cottages->isNotEmpty())
-            <div data-animate-group class="mt-14 grid gap-8 md:grid-cols-3">
+            <div data-animate-group class="mt-14 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:pb-0">
                 @foreach ($cottages as $cottage)
-                    <article class="group flex h-full flex-col overflow-hidden rounded-md bg-white card-shadow transition hover:-translate-y-1">
+                    <article class="group flex h-full w-[85%] shrink-0 snap-start flex-col overflow-hidden rounded-md bg-white card-shadow transition hover:-translate-y-1 sm:w-[55%] md:w-auto">
                         <div class="relative h-56 overflow-hidden">
                             <img src="{{ $cottage->main_image_url }}" alt="{{ $cottage->title }}" loading="lazy" decoding="async"
                                  class="h-full w-full object-cover transition duration-700 group-hover:scale-110">
@@ -227,6 +187,140 @@
         @endif
     </div>
 </section>
+
+{{-- ============================================================= --}}
+{{-- GALLERY --}}
+{{-- ============================================================= --}}
+@if ($galleryImages->isNotEmpty())
+<section id="gallery" class="bg-sand-50 py-20 lg:py-24" x-data="{ lightbox: null }">
+    <div class="container">
+        <div data-animate="up" class="mx-auto max-w-2xl text-center">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-forest-600">Moments by the Water</p>
+            <h2 class="font-display text-4xl font-semibold text-forest-900 sm:text-5xl">Gallery</h2>
+        </div>
+
+        {{-- Mobile: swipeable carousel · Desktop: grid --}}
+        <div data-animate-group class="mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
+            @foreach ($galleryImages as $image)
+                <button type="button" @click="lightbox = '{{ $image->image_url }}'"
+                        class="group relative aspect-square w-[80%] shrink-0 snap-start overflow-hidden rounded-md sm:w-auto">
+                    <img src="{{ $image->image_url }}" alt="{{ $image->title ?? 'Gallery photo' }}" loading="lazy" decoding="async"
+                         class="h-full w-full object-cover transition duration-700 group-hover:scale-110">
+                    @if ($image->title)
+                        <div class="absolute inset-0 flex items-end bg-gradient-to-t from-forest-950/70 to-transparent opacity-0 transition group-hover:opacity-100">
+                            <p class="p-3 text-left text-sm font-semibold text-white">{{ $image->title }}</p>
+                        </div>
+                    @endif
+                </button>
+            @endforeach
+        </div>
+
+        <div class="mt-10 text-center">
+            <a href="{{ route('gallery') }}"
+               class="inline-flex items-center gap-2 rounded-sm border border-forest-700 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-forest-700 transition hover:bg-forest-700 hover:text-white">
+                View Full Gallery
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+        </div>
+
+        {{-- Lightbox --}}
+        <div x-show="lightbox" x-cloak @click="lightbox = null" @keydown.escape.window="lightbox = null"
+             class="fixed inset-0 z-50 flex items-center justify-center bg-forest-950/90 p-4">
+            <img :src="lightbox" alt="" class="max-h-[90vh] max-w-[90vw] rounded-md">
+            <button type="button" @click="lightbox = null" class="absolute right-6 top-6 text-3xl text-white">&times;</button>
+        </div>
+    </div>
+</section>
+@endif
+
+{{-- ============================================================= --}}
+{{-- GUEST REVIEWS — Google & Airbnb --}}
+{{-- ============================================================= --}}
+@php
+    $googleUrl    = setting('google_reviews_url');
+    $googleRating = setting('google_rating');
+    $googleCount  = setting('google_review_count');
+    $airbnbUrl    = setting('airbnb_reviews_url');
+    $airbnbRating = setting('airbnb_rating');
+    $airbnbCount  = setting('airbnb_review_count');
+    $hasReviewBadges = $googleUrl || $airbnbUrl;
+@endphp
+@if ($hasReviewBadges || $testimonials->isNotEmpty())
+<section class="bg-white py-20 lg:py-24">
+    <div class="container">
+        <div data-animate="up" class="mx-auto max-w-2xl text-center">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.28em] text-forest-600">What Our Guests Say</p>
+            <h2 class="font-display text-4xl font-semibold text-forest-900 sm:text-5xl">Loved by Our Guests</h2>
+        </div>
+
+        {{-- Platform rating badges --}}
+        @if ($hasReviewBadges)
+            <div data-animate-group class="mx-auto mt-12 grid max-w-3xl gap-6 sm:grid-cols-2">
+                @if ($googleUrl)
+                    <a href="{{ $googleUrl }}" target="_blank" rel="noopener"
+                       class="flex items-center gap-5 rounded-md bg-white p-6 card-shadow transition hover:-translate-y-1">
+                        <svg class="h-11 w-11 shrink-0" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>
+                        <div>
+                            <p class="text-sm font-semibold uppercase tracking-wider text-slate-500">Google Reviews</p>
+                            <div class="mt-1 flex items-center gap-2">
+                                @if ($googleRating)<span class="text-2xl font-bold text-forest-900">{{ $googleRating }}</span>@endif
+                                <span class="flex text-amber-400">
+                                    @for ($i = 0; $i < 5; $i++)
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.45 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z"/></svg>
+                                    @endfor
+                                </span>
+                            </div>
+                            @if ($googleCount)<p class="mt-1 text-xs text-slate-500">Based on {{ $googleCount }} reviews</p>@endif
+                        </div>
+                    </a>
+                @endif
+
+                @if ($airbnbUrl)
+                    <a href="{{ $airbnbUrl }}" target="_blank" rel="noopener"
+                       class="flex items-center gap-5 rounded-md bg-white p-6 card-shadow transition hover:-translate-y-1">
+                        <svg class="h-11 w-11 shrink-0 text-[#FF5A5F]" fill="currentColor" viewBox="0 0 32 32"><path d="M16 1c-2.5 0-4.2 1.6-5.6 4.2-.7 1.3-1.5 3-2.5 5.1-.2.4-.4.9-.7 1.4l-.1.2C5.3 16.4 3.6 20 3.2 21.1c-.5 1.4-.6 2.3-.6 3.2C2.6 27.9 5.3 31 9 31c1.9 0 4-1 5.6-2.6.5-.5 1-1 1.4-1.6.4.6.9 1.1 1.4 1.6C19 30 21.1 31 23 31c3.7 0 6.4-3.1 6.4-6.7 0-.9-.1-1.8-.6-3.2-.4-1.1-2.1-4.7-3.9-8.2l-.1-.2c-.2-.5-.5-1-.7-1.4-1-2.1-1.8-3.8-2.5-5.1C20.2 2.6 18.5 1 16 1zm0 2.4c1.4 0 2.4.9 3.5 3 .6 1.2 1.4 2.8 2.4 4.9.2.5.5 1 .7 1.4l.1.2c1.8 3.6 3.3 6.9 3.6 7.8.4 1.1.5 1.7.5 2.3 0 2.4-1.7 4.3-4 4.3-1.2 0-2.7-.7-4-1.9-.5-.5-1-1-1.4-1.6 1.9-2.4 3.2-4.9 3.2-7 0-2.4-1.7-4.1-4-4.1s-4 1.7-4 4.1c0 2.1 1.3 4.6 3.2 7-.4.6-.9 1.1-1.4 1.6-1.3 1.2-2.8 1.9-4 1.9-2.3 0-4-1.9-4-4.3 0-.6.1-1.2.5-2.3.3-.9 1.8-4.2 3.6-7.8l.1-.2c.2-.4.5-.9.7-1.4 1-2.1 1.8-3.7 2.4-4.9 1.1-2.1 2.1-3 3.5-3zm0 11c1.1 0 1.7.8 1.7 1.9 0 1.3-.9 3.1-1.7 4.3-.8-1.2-1.7-3-1.7-4.3 0-1.1.6-1.9 1.7-1.9z"/></svg>
+                        <div>
+                            <p class="text-sm font-semibold uppercase tracking-wider text-slate-500">Airbnb Reviews</p>
+                            <div class="mt-1 flex items-center gap-2">
+                                @if ($airbnbRating)<span class="text-2xl font-bold text-forest-900">{{ $airbnbRating }}</span>@endif
+                                <span class="flex text-amber-400">
+                                    @for ($i = 0; $i < 5; $i++)
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.45 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z"/></svg>
+                                    @endfor
+                                </span>
+                            </div>
+                            @if ($airbnbCount)<p class="mt-1 text-xs text-slate-500">Based on {{ $airbnbCount }} reviews</p>@endif
+                        </div>
+                    </a>
+                @endif
+            </div>
+        @endif
+
+        {{-- Guest testimonials — mobile carousel · desktop grid --}}
+        @if ($testimonials->isNotEmpty())
+            <div data-animate-group class="mt-14 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+                @foreach ($testimonials as $t)
+                    <figure class="flex w-[85%] shrink-0 snap-start flex-col rounded-md bg-sand-50 p-7 sm:w-[60%] md:w-auto">
+                        <div class="flex gap-1 text-amber-400">
+                            @for ($i = 0; $i < ($t->rating ?: 5); $i++)
+                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 0 0 .95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 0 0-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 0 0-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 0 0-.364-1.118L2.45 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 0 0 .951-.69l1.07-3.292Z"/></svg>
+                            @endfor
+                        </div>
+                        <blockquote class="mt-4 flex-1 text-sm leading-relaxed text-slate-600">“{{ $t->message }}”</blockquote>
+                        <figcaption class="mt-5 flex items-center gap-3">
+                            <img src="{{ $t->image_url }}" alt="{{ $t->name }}" loading="lazy" class="h-10 w-10 rounded-full object-cover">
+                            <div>
+                                <p class="text-sm font-semibold text-forest-900">{{ $t->name }}</p>
+                                @if ($t->location)<p class="text-xs text-slate-400">{{ $t->location }}</p>@endif
+                            </div>
+                        </figcaption>
+                    </figure>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</section>
+@endif
 
 {{-- ============================================================= --}}
 {{-- EXPERIENCE THE BEST OF — dark photo band --}}

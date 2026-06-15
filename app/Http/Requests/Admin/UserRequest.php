@@ -11,7 +11,7 @@ class UserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return (bool) $this->user()?->can('manage_users');
     }
 
     public function rules(): array
@@ -24,7 +24,7 @@ class UserRequest extends FormRequest
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'phone' => ['nullable', 'string', 'max:30'],
             'role' => ['required', Rule::in(User::STAFF_ROLES)],
-            'password' => [$creating ? 'required' : 'nullable', 'confirmed', Password::min(8)],
+            'password' => [$creating ? 'required' : 'nullable', 'confirmed', Password::min(8)->mixedCase()->numbers()],
         ];
     }
 }

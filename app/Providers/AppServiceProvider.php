@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Services\RazorpayService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +17,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Build the Razorpay client from config so injected instances carry the
+        // configured keys (the bare constructor defaults to disabled).
+        $this->app->singleton(RazorpayService::class, fn () => RazorpayService::fromConfig());
     }
 
     /**

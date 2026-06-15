@@ -9,6 +9,7 @@ use App\Models\Destination;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -53,10 +54,37 @@ class BookingController extends Controller
         $data['coupon_id'] = $coupon?->id;
         $data['coupon_code'] = $coupon?->code;
 
-        $booking = Booking::create($data);
+        $booking = DB::transaction(function () use ($data, $coupon) {
+            // Re-check the usage limit under a row lock so concurrent bookings
+            // can't push a limited coupon past its cap.
+            $locked = $coupon ? Coupon::whereKey($coupon->id)->lockForUpdate()->first() : null;
 
-        if ($coupon) {
-            $coupon->increment('used_count');
+            $exhausted = $locked && $locked->usage_limit !== null
+                && $locked->used_count >= $locked->usage_limit;
+
+            if (! $locked || $exhausted) {
+                // Coupon vanished or was exhausted by a concurrent request — drop it and re-price.
+                $data['discount_amount'] = 0.0;
+                $data['total'] = $data['subtotal'];
+                $data['coupon_id'] = null;
+                $data['coupon_code'] = null;
+                $locked = null;
+            }
+
+            $booking = Booking::create($data);
+
+            $locked?->increment('used_count');
+
+            return $booking;
+        });
+
+        // A priced booking proceeds to checkout; a no-price inquiry stays a free
+        // inquiry that the team follows up on.
+        if ($booking->requiresPayment()) {
+            return redirect()->route('booking.pay', [
+                'booking' => $booking,
+                'token' => $booking->payment_token,
+            ]);
         }
 
         return redirect()

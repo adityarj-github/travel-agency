@@ -24,6 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 ? route('admin.login')
                 : route('login');
         });
+
+        // Razorpay posts the webhook server-to-server; it carries no CSRF token
+        // and is authenticated by its own signature instead.
+        $middleware->validateCsrfTokens(except: [
+            'razorpay/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
