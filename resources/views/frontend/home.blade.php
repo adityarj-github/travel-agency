@@ -42,9 +42,16 @@
         </div>
 
         {{-- Inquiry form card — same booking form used across the site --}}
-        <div id="plan" class="animate-fade-up delay-200 w-full rounded-md bg-white p-7 shadow-2xl shadow-forest-950/30 sm:p-8">
-            <h2 class="font-display text-2xl font-semibold text-forest-900">Plan Your Getaway</h2>
-            <p class="mt-1 text-sm text-slate-500">Tell us a little about your trip and we'll be in touch.</p>
+        <div id="plan" class="animate-fade-up delay-200 w-full rounded-xl bg-white p-5 shadow-2xl shadow-forest-950/30 sm:rounded-md sm:p-7 lg:p-8">
+            <div class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-forest-50 text-forest-700">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg>
+                </span>
+                <div>
+                    <h2 class="font-display text-xl font-semibold leading-tight text-forest-900 sm:text-2xl">Plan Your Getaway</h2>
+                    <p class="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">Tell us a little about your trip and we'll be in touch.</p>
+                </div>
+            </div>
 
             @if ($errors->any())
                 <div class="mt-4 rounded-sm bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -52,7 +59,7 @@
                 </div>
             @endif
 
-            <div class="mt-5">
+            <div class="mt-5 sm:mt-6">
                 <x-booking-form :packages="$packages" :destinations="$bookingDestinations" compact />
             </div>
         </div>
@@ -73,7 +80,7 @@
                 ['t' => 'Ideal for Groups',   'd' => 'Perfect for reunions, retreats & special celebrations.',     'i' => 'M17 20h5v-2a4 4 0 0 0-3-3.87M9 20H4v-2a4 4 0 0 1 3-3.87m6-1.13a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z'],
             ];
         @endphp
-        <div data-animate-group class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+        <div data-animate-group class="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-8 lg:grid-cols-5">
             @foreach ($amenities as $a)
                 <div class="flex flex-col items-center text-center">
                     <svg class="h-9 w-9 text-forest-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">

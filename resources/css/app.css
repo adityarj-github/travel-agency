@@ -31,6 +31,16 @@
     .form-input-base {
         @apply w-full rounded-lg border-slate-300 bg-white px-4 py-2.5 text-sm shadow-sm focus:border-brand-500 focus:ring-brand-500;
     }
+    /* Redesigned select: native picker (best on mobile) + custom chevron, no OS arrow */
+    .form-select-base {
+        @apply form-input-base appearance-none bg-no-repeat pr-11;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-position: right 0.875rem center;
+        background-size: 1.15rem 1.15rem;
+    }
+    .form-select-base::-ms-expand { display: none; }
     .form-label {
         @apply mb-1.5 block text-sm font-medium text-slate-700;
     }
