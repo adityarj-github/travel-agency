@@ -74,7 +74,7 @@
         {{-- Map --}}
         @if (setting('map_embed'))
             <div class="container mt-12">
-                <div class="overflow-hidden rounded-2xl card-shadow">
+                <div class="overflow-hidden rounded-2xl card-shadow [&_iframe]:block [&_iframe]:h-[300px] [&_iframe]:w-full [&_iframe]:border-0 sm:[&_iframe]:h-[420px]">
                     {!! setting('map_embed') !!}
                 </div>
             </div>

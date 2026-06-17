@@ -9,9 +9,17 @@
     <section class="py-16">
         <div class="container grid gap-8 lg:grid-cols-4">
             {{-- Filters sidebar --}}
-            <aside class="lg:col-span-1">
-                <form method="GET" action="{{ route('packages.index') }}" class="sticky top-24 space-y-5 rounded-2xl border border-slate-100 bg-white p-6 card-shadow">
-                    <h3 class="text-lg font-bold text-slate-900">Filter Tours</h3>
+            <aside class="lg:col-span-1" x-data="{ filtersOpen: false }">
+                {{-- Mobile toggle --}}
+                <button type="button" @click="filtersOpen = !filtersOpen"
+                        class="mb-3 flex w-full items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 font-bold text-slate-900 card-shadow lg:hidden">
+                    <span>Filter Tours</span>
+                    <svg class="h-5 w-5 transition-transform" :class="filtersOpen && 'rotate-180'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <form method="GET" action="{{ route('packages.index') }}"
+                      class="space-y-5 rounded-2xl border border-slate-100 bg-white p-6 card-shadow lg:sticky lg:top-24 lg:!block"
+                      :class="filtersOpen ? 'block' : 'hidden'">
+                    <h3 class="hidden text-lg font-bold text-slate-900 lg:block">Filter Tours</h3>
 
                     <div>
                         <label class="form-label">Search</label>

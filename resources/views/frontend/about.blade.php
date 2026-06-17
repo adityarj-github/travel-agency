@@ -17,10 +17,10 @@
                         ? nl2br(e(setting('about_content')))
                         : '<p>We are a passionate team of travel experts dedicated to turning your travel dreams into reality. With years of experience and a deep love for exploration, we craft personalised journeys that create lifelong memories.</p><p>From exotic beach getaways to thrilling mountain adventures, we handle every detail so you can focus on what matters most — enjoying the experience.</p>' !!}
                 </div>
-                <div class="mt-8 grid grid-cols-3 gap-6 text-center">
-                    <div><p class="text-3xl font-bold text-brand-600">{{ setting('stat_travellers', '5000+') }}</p><p class="text-sm text-slate-500">Happy Travellers</p></div>
-                    <div><p class="text-3xl font-bold text-brand-600">{{ setting('stat_destinations', '120+') }}</p><p class="text-sm text-slate-500">Destinations</p></div>
-                    <div><p class="text-3xl font-bold text-brand-600">{{ setting('stat_years', '10+') }}</p><p class="text-sm text-slate-500">Years Experience</p></div>
+                <div class="mt-8 grid grid-cols-3 gap-3 text-center sm:gap-6">
+                    <div><p class="text-2xl font-bold text-brand-600 sm:text-3xl">{{ setting('stat_travellers', '5000+') }}</p><p class="text-sm text-slate-500">Happy Travellers</p></div>
+                    <div><p class="text-2xl font-bold text-brand-600 sm:text-3xl">{{ setting('stat_destinations', '120+') }}</p><p class="text-sm text-slate-500">Destinations</p></div>
+                    <div><p class="text-2xl font-bold text-brand-600 sm:text-3xl">{{ setting('stat_years', '10+') }}</p><p class="text-sm text-slate-500">Years Experience</p></div>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">

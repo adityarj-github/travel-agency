@@ -17,7 +17,8 @@
           adults: {{ (int) old('adults', 1) }},
           children: {{ (int) old('children', 0) }},
           applyUrl: '{{ route('booking.apply-coupon') }}',
-      })">
+      })"
+      @package-selected="unit = $event.detail.price; resetCoupon()">
     @csrf
 
     <div class="grid gap-4 sm:grid-cols-2">
@@ -49,27 +50,37 @@
             <input type="text" value="{{ $selectedPackage->title }}" disabled class="form-input-base bg-slate-50">
         </div>
     @else
+        @php
+            $destinationOptions = collect($destinations ?? [])->map(fn ($d) => [
+                'value' => $d->id,
+                'label' => $d->name,
+            ])->all();
+            $packageOptions = collect($packages ?? [])->map(function ($p) use ($symbol) {
+                $unit = ($p->discount_price && $p->discount_price > 0) ? $p->discount_price : $p->price;
+                return [
+                    'value' => $p->id,
+                    'label' => $p->title,
+                    'price' => (float) $unit,
+                    'meta'  => $unit > 0 ? $symbol . number_format($unit, 0) : null,
+                ];
+            })->all();
+        @endphp
         <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-                <label class="form-label">Destination</label>
-                <select name="destination_id" class="form-input-base">
-                    <option value="">Select destination</option>
-                    @foreach ($destinations ?? [] as $d)
-                        <option value="{{ $d->id }}" @selected(old('destination_id') == $d->id)>{{ $d->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="form-label">Package</label>
-                <select name="package_id" class="form-input-base"
-                        @change="unit = parseFloat($event.target.selectedOptions[0]?.dataset.price || 0); resetCoupon()">
-                    <option value="" data-price="0">Select package</option>
-                    @foreach ($packages ?? [] as $p)
-                        @php $unit = ($p->discount_price && $p->discount_price > 0) ? $p->discount_price : $p->price; @endphp
-                        <option value="{{ $p->id }}" data-price="{{ $unit }}" @selected(old('package_id') == $p->id)>{{ $p->title }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <x-select-field
+                name="destination_id"
+                label="Destination"
+                placeholder="Select destination"
+                :options="$destinationOptions"
+                :selected="old('destination_id')"
+                icon="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <x-select-field
+                name="package_id"
+                label="Package"
+                placeholder="Select package"
+                :options="$packageOptions"
+                :selected="old('package_id')"
+                dispatch="package-selected"
+                icon="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12" />
         </div>
     @endif
 
